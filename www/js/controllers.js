@@ -154,7 +154,13 @@ angular.module('conFusion.controllers', [])
     };
 }])
 
-.controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', 'baseURL', function($scope, $stateParams, menuFactory, baseURL) {
+.controller('DishDetailController', ['$scope', '$ionicModal', '$ionicPopover', '$stateParams', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicListDelegate', '$timeout', function ($scope, $ionicModal, $ionicPopover, $stateParams, menuFactory, favoriteFactory, baseURL, $ionicListDelegate, $timeout) {
+    $scope.addFavorite = function (index) {
+        console.log("index is " + index);
+        favoriteFactory.addToFavorites(index);
+        $ionicListDelegate.closeOptionButtons();
+    }
+
     $scope.baseURL = baseURL;
     $scope.dish = {};
     $scope.showDish = false;
@@ -171,10 +177,97 @@ angular.module('conFusion.controllers', [])
                     }
     );
 
+    // .fromTemplate() method
+    // var template = '<ion-popover-view><ion-header-bar> <h1 class="title">My Popover Title</h1> </ion-header-bar> <ion-content> Hello! </ion-content></ion-popover-view>';
+
+    // $scope.popover = $ionicPopover.fromTemplate('templates/dish-detail-popover.html', {
+    //   scope: $scope
+    // });
+
+    // .fromTemplateUrl() method
+    $ionicPopover.fromTemplateUrl('templates/dish-detail-popover.html', {
+      scope: $scope
+    }).then(function(popover) {
+      $scope.popover = popover;
+    });
+
+
+    $scope.openPopover = function($event) {
+      $scope.popover.show($event);
+    };
+    $scope.closePopover = function() {
+      $scope.popover.hide();
+    };
+    //Cleanup the popover when we're done with it!
+    $scope.$on('$destroy', function() {
+      $scope.popover.remove();
+    });
+    // Execute action on hide popover
+    $scope.$on('popover.hidden', function() {
+      // Execute action
+    });
+    // Execute action on remove popover
+    $scope.$on('popover.removed', function() {
+      // Execute action
+    });
+
+
+    $scope.dishcomment = {};
+
+    // Create the dishcomment modal that we will use later
+    $ionicModal.fromTemplateUrl('templates/dish-comment.html', {
+      scope: $scope
+    }).then(function(modal) {
+      $scope.dishcommentform = modal;
+    });
+
+    // Triggered in the dishcomment modal to close it
+    $scope.closeDishComment = function() {
+      $scope.dishcommentform.hide();
+    };
+
+    // Open the dishcomment modal
+    $scope.dishComment = function() {
+      $scope.dishcommentform.show();
+    };
+
+    // Perform the dishcomment action when the user submits the dishcomment form
+    $scope.doDishComment = function() {
+      console.log('Doing dishcomment', $scope.dishcommenting);
+        
+      $scope.dishcomment.date = new Date().toISOString();
+      console.log($scope.dishcomment);
+      
+      $scope.dish.comments.push($scope.dishcomment);
+menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
+      
+      $scope.dishcomment = {rating:5, comment:"", author:"", date:""};
+
+      // Simulate a dishcommenting delay. Remove this and replace with your dishcommenting
+      // code if using a server system
+      $timeout(function() {
+        $scope.closeDishComment();
+      }, 1000);
+    };   
+
+    $scope.dishcomment = {rating:5, comment:"", author:"", date:""};
+    
+    $scope.submitComment = function () {
+        
+        $scope.dishcomment.date = new Date().toISOString();
+        console.log($scope.dishcomment);
+        
+        $scope.dish.comments.push($scope.dishcomment);
+menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
+        
+        $scope.commentForm.$setPristine();
+        
+        $scope.dishcomment = {rating:5, comment:"", author:"", date:""};
+    }
     
 }])
 
-.controller('DishCommentController', ['$scope', 'menuFactory', function($scope,menuFactory) {
+.controller('DishCommentController', ['$scope', 'menuFactory', '$timeout', function ($scope, menuFactory) {
     
     $scope.mycomment = {rating:5, comment:"", author:"", date:""};
     
@@ -190,6 +283,7 @@ menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
         
         $scope.mycomment = {rating:5, comment:"", author:"", date:""};
     }
+
 }])
 
 // implement the IndexController and About Controller here
