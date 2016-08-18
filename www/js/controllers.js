@@ -1,3 +1,5 @@
+'use strict';
+/*jshint -W117 */
 angular.module('conFusion.controllers', [])
 
 .controller('AppCtrl', function ($scope, $ionicModal, $timeout, $localStorage) {
@@ -72,30 +74,12 @@ angular.module('conFusion.controllers', [])
   };
 })
 
-.controller('MenuController', ['$scope', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicListDelegate', function ($scope, menuFactory, favoriteFactory, baseURL, $ionicListDelegate) {
-
-    $scope.addFavorite = function (index) {
-        console.log("index is " + index);
-        favoriteFactory.addToFavorites(index);
-        $ionicListDelegate.closeOptionButtons();
-    }
+.controller('MenuController', ['$scope', 'dishes', 'favoriteFactory', 'baseURL', '$ionicListDelegate', function ($scope, dishes, favoriteFactory, baseURL, $ionicListDelegate) {
 
     $scope.baseURL = baseURL;
     $scope.tab = 1;
     $scope.filtText = '';
-    $scope.showDetails = false;
-    $scope.showMenu = false;
-    $scope.message = "Loading ...";
-    
-    menuFactory.query(
-        function(response) {
-            $scope.dishes = response;
-            $scope.showMenu = true;
-        },
-        function(response) {
-            $scope.message = "Error: "+response.status + " " + response.statusText;
-        });
-
+    $scope.dishes = dishes;
                 
     $scope.select = function(setTab) {
         $scope.tab = setTab;
@@ -112,6 +96,12 @@ angular.module('conFusion.controllers', [])
         else {
             $scope.filtText = "";
         }
+    };
+
+    $scope.addFavorite = function (index) {
+        console.log("index is " + index);
+        favoriteFactory.addToFavorites(index);
+        $ionicListDelegate.closeOptionButtons();
     };
 
     $scope.isSelected = function (checkTab) {
@@ -140,7 +130,7 @@ angular.module('conFusion.controllers', [])
         
         console.log($scope.feedback);
         
-        if ($scope.feedback.agree && ($scope.feedback.mychannel == "")) {
+        if ($scope.feedback.agree && ($scope.feedback.mychannel === "")) {
             $scope.invalidChannelSelection = true;
             console.log('incorrect');
         }
@@ -260,7 +250,7 @@ menuFactory.update({id:$scope.dish.id},$scope.dish);
         $scope.commentForm.$setPristine();
         
         $scope.dishcomment = {rating:5, comment:"", author:"", date:""};
-    }
+    };
     
 }])
 
@@ -279,45 +269,28 @@ menuFactory.update({id:$scope.dish.id},$scope.dish);
         $scope.commentForm.$setPristine();
         
         $scope.mycomment = {rating:5, comment:"", author:"", date:""};
-    }
+    };
 
 }])
 
 // implement the IndexController and About Controller here
 
-.controller('IndexController', ['$scope', 'menuFactory', 'promotionFactory', 'corporateFactory', 'baseURL', function ($scope, menuFactory, promotionFactory, corporateFactory, baseURL) {
+.controller('IndexController', ['$scope', 'dish', 'promotion', 'leader', 'baseURL', function ($scope, dish, promotion, leader, baseURL) {
 
     $scope.baseURL = baseURL;
-    $scope.leader = corporateFactory.get({
-        id: 3
-    });
 
     $scope.showDish = false;
     $scope.message = "Loading ...";
 
-    $scope.dish = menuFactory.get({
-            id: 0
-        })
-        .$promise.then(
-            function (response) {
-                $scope.dish = response;
-                $scope.showDish = true;
-            },
-            function (response) {
-                $scope.message = "Error: " + response.status + " " + response.statusText;
-            }
-        );
-
-    $scope.promotion = promotionFactory.get({
-        id: 0
-    });
+    $scope.dish = dish;
+    $scope.promotion = promotion;
+    $scope.leader = leader;
 
 }])
 
-.controller('AboutController', ['$scope', 'corporateFactory', 'baseURL', function($scope, corporateFactory, baseURL) {
+.controller('AboutController', ['$scope', 'leaders', 'baseURL', function($scope, leaders, baseURL) {
             $scope.baseURL = baseURL;
-            $scope.leaders = corporateFactory.query();
-            console.log($scope.leaders);
+            $scope.leaders = leaders;
     
             }])
 
@@ -334,7 +307,7 @@ menuFactory.update({id:$scope.dish.id},$scope.dish);
             $scope.toggleDelete = function () {
                 $scope.shouldShowDelete = !$scope.shouldShowDelete;
                 console.log($scope.shouldShowDelete);
-            }
+            };
 
             $scope.deleteFavorite = function (index) {
 
@@ -354,7 +327,7 @@ menuFactory.update({id:$scope.dish.id},$scope.dish);
 
                 $scope.shouldShowDelete = false;
 
-            }
+            };
 
 }])
 
