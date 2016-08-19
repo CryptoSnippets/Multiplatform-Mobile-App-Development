@@ -130,7 +130,7 @@ angular.module('conFusion.controllers', [])
         
         console.log($scope.feedback);
         
-        if ($scope.feedback.agree && ($scope.feedback.mychannel === "")) {
+        if ($scope.feedback.agree && ($scope.feedback.mychannel == "")) {
             $scope.invalidChannelSelection = true;
             console.log('incorrect');
         }
@@ -148,36 +148,17 @@ angular.module('conFusion.controllers', [])
 .controller('DishDetailController', ['$scope', '$stateParams', 'dish', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicPopover', '$ionicModal', function ($scope, $stateParams, dish, menuFactory, favoriteFactory, baseURL, $ionicPopover, $ionicModal) {
 
     $scope.baseURL = baseURL;
-
-    $scope.dish = dish;
+    $scope.dish = {}; // Unsure this is actually required.
     $scope.showDish = false;
     $scope.message="Loading ...";
     
-    $scope.dish = menuFactory.get({id:parseInt($stateParams.id,10)})
-    .$promise.then(
-                    function(response){
-                        $scope.dish = response;
-                        $scope.showDish = true;
-                    },
-                    function(response) {
-                        $scope.message = "Error: "+response.status + " " + response.statusText;
-                    }
-    );
+    $scope.dish = dish;
 
-    // .fromTemplate() method
-    // var template = '<ion-popover-view><ion-header-bar> <h1 class="title">My Popover Title</h1> </ion-header-bar> <ion-content> Hello! </ion-content></ion-popover-view>';
-
-    // $scope.popover = $ionicPopover.fromTemplate('templates/dish-detail-popover.html', {
-    //   scope: $scope
-    // });
-
-    // .fromTemplateUrl() method
     $ionicPopover.fromTemplateUrl('templates/dish-detail-popover.html', {
       scope: $scope
     }).then(function(popover) {
       $scope.popover = popover;
     });
-
 
     $scope.openPopover = function($event) {
       $scope.popover.show($event);
@@ -185,19 +166,13 @@ angular.module('conFusion.controllers', [])
     $scope.closePopover = function() {
       $scope.popover.hide();
     };
-    //Cleanup the popover when we're done with it!
     $scope.$on('$destroy', function() {
       $scope.popover.remove();
     });
-    // Execute action on hide popover
     $scope.$on('popover.hidden', function() {
-      // Execute action
     });
-    // Execute action on remove popover
     $scope.$on('popover.removed', function() {
-      // Execute action
     });
-
 
     $scope.dishcomment = {};
 
@@ -207,6 +182,12 @@ angular.module('conFusion.controllers', [])
     }).then(function(modal) {
       $scope.dishcommentform = modal;
     });
+
+    $scope.addFavorite = function (index) {
+        console.log("index is " + index);
+        favoriteFactory.addToFavorites(index);
+        $scope.dishDetailPopover.hide();
+    };
 
     // Triggered in the dishcomment modal to close it
     $scope.closeDishComment = function() {
@@ -226,7 +207,7 @@ angular.module('conFusion.controllers', [])
       console.log($scope.dishcomment);
       
       $scope.dish.comments.push($scope.dishcomment);
-menuFactory.update({id:$scope.dish.id},$scope.dish);
+      menuFactory.update({id:$scope.dish.id},$scope.dish);
       
       $scope.dishcomment = {rating:5, comment:"", author:"", date:""};
 
