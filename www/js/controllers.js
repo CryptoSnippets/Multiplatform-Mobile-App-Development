@@ -2,7 +2,7 @@
 /*jshint -W117 */
 angular.module('conFusion.controllers', [])
 
-.controller('AppCtrl', function ($scope, $ionicModal, $timeout, $localStorage, $ionicPlatform, $cordovaCamera) {
+.controller('AppCtrl', function ($scope, $ionicModal, $timeout, $localStorage, $ionicPlatform, $cordovaCamera, $cordovaImagePicker) {
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -43,26 +43,38 @@ angular.module('conFusion.controllers', [])
     $ionicPlatform.ready(function() {
 
        $scope.takePicture = function() {
-        
-        var options = {
-            quality: 50,
-            destinationType: Camera.DestinationType.DATA_URL,
-            sourceType: Camera.PictureSourceType.CAMERA,
-            allowEdit: true,
-            encodingType: Camera.EncodingType.JPEG,
-            targetWidth: 100,
-            targetHeight: 100,
-            popoverOptions: CameraPopoverOptions,
-            saveToPhotoAlbum: false
+          var options = {
+              quality: 80,
+              destinationType: Camera.DestinationType.DATA_URL,
+              sourceType: Camera.PictureSourceType.CAMERA,
+              allowEdit: true,
+              encodingType: Camera.EncodingType.JPEG,
+              targetWidth: 100,
+              targetHeight: 100,
+              popoverOptions: CameraPopoverOptions,
+              saveToPhotoAlbum: false
+          };
+              $cordovaCamera.getPicture(options).then(function(imageData) {
+                  $scope.registration.imgSrc = "data:image/jpeg;base64," + imageData;
+              }, function(err) {
+                  console.log(err);
+              });
+              // $scope.registerform.show();
         };
-            $cordovaCamera.getPicture(options).then(function(imageData) {
-                $scope.registration.imgSrc = "data:image/jpeg;base64," + imageData;
-            }, function(err) {
-                console.log(err);
-            });
-
-            $scope.registerform.show();
-
+        $scope.openGallery = function () {
+          var options = {
+              maximumImagesCount: 1,
+              width: 100,
+              height: 100,
+              quality: 80
+          };
+          $cordovaImagePicker.getPictures(options)
+            .then(function (results) {
+              $scope.registration.imgSrc = results[0];
+              }, function(error) {
+              console.log(error);
+              // error getting photos
+          });
         };
     });
 
