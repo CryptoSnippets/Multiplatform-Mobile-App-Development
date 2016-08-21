@@ -377,7 +377,7 @@ menuFactory.update({id:$scope.dish.id},$scope.dish);
     
             }])
 
-.controller('FavoritesController', ['$scope', 'dishes', 'favorites', 'favoriteFactory', 'baseURL', '$ionicListDelegate', '$ionicPopup', '$ionicLoading', '$timeout', '$cordovaVibration', function ($scope, dishes, favorites, favoriteFactory, baseURL, $ionicListDelegate, $ionicPopup, $ionicLoading, $timeout, $cordovaVibration) {
+.controller('FavoritesController', ['$scope', 'dishes', 'favorites', 'favoriteFactory', 'baseURL', '$ionicListDelegate', '$ionicPopup', '$ionicLoading', '$timeout', '$ionicPlatform', '$cordovaVibration', function ($scope, dishes, favorites, favoriteFactory, baseURL, $ionicListDelegate, $ionicPopup, $ionicLoading, $timeout, $ionicPlatform, $cordovaVibration) {
 
     $scope.baseURL = baseURL;
     $scope.shouldShowDelete = false;
@@ -403,7 +403,9 @@ menuFactory.update({id:$scope.dish.id},$scope.dish);
                     if (res) {
                         console.log('Ok to delete');
                         favoriteFactory.deleteFromFavorites(index);
-                        $cordovaVibration.vibrate(100);
+                        $ionicPlatform.ready(function() {
+                          $cordovaVibration.vibrate(100);
+                        });
                     } else {
                         console.log('Canceled delete');
                     }
