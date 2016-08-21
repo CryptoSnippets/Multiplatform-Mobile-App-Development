@@ -195,9 +195,9 @@ angular.module('conFusion.controllers', [])
         return ($scope.tab === checkTab);
     };
 
-    $scope.toggleDetails = function() {
-        $scope.showDetails = !$scope.showDetails;
-    };
+    // $scope.toggleDetails = function() {
+    //     $scope.showDetails = !$scope.showDetails;
+    // };
 }])
 
 .controller('ContactController', ['$scope', function($scope) {
@@ -232,59 +232,72 @@ angular.module('conFusion.controllers', [])
     };
 }])
 
-.controller('DishDetailController', ['$scope', '$stateParams', 'dish', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicPopover', '$ionicModal', function ($scope, $stateParams, dish, menuFactory, favoriteFactory, baseURL, $ionicPopover, $ionicModal) {
+.controller('DishDetailController', ['$scope', '$stateParams', 'dish', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicPopover', '$ionicModal', '$ionicPlatform', '$cordovaLocalNotification', '$cordovaToast', function ($scope, $stateParams, dish, menuFactory, favoriteFactory, baseURL, $ionicPopover, $ionicModal, $ionicPlatform, $cordovaLocalNotification, $cordovaToast) {
 
     $scope.baseURL = baseURL;
-    $scope.dish = {}; // Unsure this is actually required.
+    $scope.dish = {}; 
     $scope.showDish = false;
     $scope.message="Loading ...";
-    
-    $scope.dish = dish;
 
     $ionicPopover.fromTemplateUrl('templates/dish-detail-popover.html', {
       scope: $scope
     }).then(function(popover) {
-      $scope.popover = popover;
+      $scope.dishDetailPopover = popover;
     });
-
-    $scope.openPopover = function($event) {
-      $scope.popover.show($event);
-    };
-    $scope.closePopover = function() {
-      $scope.popover.hide();
-    };
-    $scope.$on('$destroy', function() {
-      $scope.popover.remove();
-    });
-    $scope.$on('popover.hidden', function() {
-    });
-    $scope.$on('popover.removed', function() {
-    });
-
-    $scope.dishcomment = {};
 
     // Create the dishcomment modal that we will use later
     $ionicModal.fromTemplateUrl('templates/dish-comment.html', {
       scope: $scope
     }).then(function(modal) {
-      $scope.dishcommentform = modal;
+      $scope.commentModal = modal;
     });
+
+    $scope.openCommentModal = function($event) {
+      $scope.commentModal.show($event);
+    };
+    $scope.closeCommentModal = function() {
+      $scope.commentModal.hide();
+    };
+    
+    $scope.dish = dish;
 
     $scope.addFavorite = function (index) {
         console.log("index is " + index);
         favoriteFactory.addToFavorites(index);
         $scope.dishDetailPopover.hide();
 
+        $ionicPlatform.ready(function () {
+            $cordovaLocalNotification.schedule({
+                id: 1,
+                title: "Added Favorite",
+                text: $scope.dish.name
+            }).then(function () {
+                console.log('Added Favorite '+$scope.dish.name);
+            }, function () {
+                console.log('Failed to add Notification ');
+            });
+
+            $cordovaToast
+              .show('Added Favorite '+$scope.dish.name, 'long', 'bottom')
+              .then(function (success) {
+                  // success
+              }, function (error) {
+                  // error
+              });
+        });
     };
+
+    $scope.dishcomment = {};
 
     // Triggered in the dishcomment modal to close it
     $scope.closeDishComment = function() {
-      $scope.dishcommentform.hide();
+      $scope.commentModal.hide();
     };
 
     // Open the dishcomment modal
     $scope.dishComment = function() {
-      $scope.dishcommentform.show();
+      $scope.commentModal.show();
+      $scope.dishDetailPopover.hide();
     };
 
     // Perform the dishcomment action when the user submits the dishcomment form
@@ -296,7 +309,7 @@ angular.module('conFusion.controllers', [])
       
       $scope.dish.comments.push($scope.dishcomment);
       menuFactory.update({id:$scope.dish.id},$scope.dish);
-      $scope.dishcommentform.hide();
+      $scope.commentModal.hide();
       
       $scope.dishcomment = {rating:5, comment:"", author:"", date:""};
 

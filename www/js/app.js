@@ -126,8 +126,8 @@ angular.module('conFusion', ['ionic', 'ngCordova', 'conFusion.controllers', 'con
               dishes:  ['menuFactory', function(menuFactory){
                 return menuFactory.query();
               }],
-                            favorites: ['favoriteFactory', function(favoriteFactory) {
-                  return favoriteFactory.getFavorites();
+              favorites: ['favoriteFactory', function(favoriteFactory) {
+                return favoriteFactory.getFavorites();
               }]
           }
         }
